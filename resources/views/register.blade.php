@@ -3,6 +3,7 @@
     <h1 class="text-5xl mb-10 font-bold">Register</h1>
     <div id="res"></div>
     <form hx-target="#res" hx-post="/register" class="form w-fit mx-auto">
+      @csrf
       <input required type="email" placeholder="Email" name="email" class="input">
       <input required type="password" placeholder="Password" name="password" class="input">
       <input required placeholder="Username (has to be unique)" name="name" class="input">

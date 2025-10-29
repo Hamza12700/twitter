@@ -15,8 +15,8 @@ return new class extends Migration
       $table->id();
       $table->string('name')->unique();
       $table->string('nickname');
-      $table->string('profile_picture');
-      $table->string('background_picture');
+      $table->string('profile_picture')->default("/default-profile-picture.svg");
+      $table->string('background_picture')->default("none");
 
       $table->string('email')->unique();
       $table->timestamp('email_verified_at')->nullable();

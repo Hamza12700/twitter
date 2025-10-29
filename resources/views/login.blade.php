@@ -3,6 +3,7 @@
     <h1 class="text-5xl mb-10 font-bold">Login</h1>
     <div id="res"></div>
     <form hx-target="#res" hx-post="/login" class="form w-fit mx-auto">
+      @csrf
       <div class="title">Welcome,<br><span>login to continue</span></div>
       <input required type="email" placeholder="Email" name="email" class="input">
       <input required type="password" placeholder="Password" name="password" class="input">

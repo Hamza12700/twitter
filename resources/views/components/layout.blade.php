@@ -6,6 +6,14 @@
 
     <title>{{$title}}</title>
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
+    <script>
+    htmx.config.responseHandling = [
+      {code:"[4]..",swap:true},
+      @if (config("app.debug"))
+        {code:"500", swap:true},
+      @endif
+    ];
+    </script>
 
     <!-- Styles / Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
