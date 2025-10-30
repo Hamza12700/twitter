@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Tweet;
 
 // Sucks that can't simply use 'redirect' because of HTMX.
 // Htmx doesn't reload/redirect if status code isn't 2xx.
@@ -18,7 +19,10 @@ Route::get("/", function () {
 });
 
 Route::get('/home', function () {
-  return view('home');
+  return view('home', [
+    "user_id" => Auth::user()->id,
+    "tweets" => Tweet::all()]
+  );
 })->middleware('auth');
 
 Route::get('/register', function () {
@@ -59,7 +63,7 @@ Route::post('/login', function (Request $request) {
     "password" => "required|string",
   ]);
 
-  if (Auth::attempt($info)) {
+  if (Auth::attempt($info, true)) {
     $request->session()->regenerate();
     return hx_redirect("/home");
   }
@@ -73,3 +77,14 @@ Route::get("/logout", function (Request $request) {
   $request->session()->regenerateToken();
   return redirect('/');
 })->middleware('auth');
+
+Route::middleware("auth")->group(function () {
+  Route::post("/tweet", function (Request $request) {
+    $tweet = $request->validate([
+      "content" => "required|string",
+      "tweeted_by" => "required|integer",
+    ]);
+
+    Tweet::create($tweet);
+  });
+});

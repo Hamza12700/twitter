@@ -6,6 +6,7 @@
 
     <title>{{$title}}</title>
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="favicon.png">
     <script>
     htmx.config.responseHandling = [
       {code:"[4]..",swap:true},
