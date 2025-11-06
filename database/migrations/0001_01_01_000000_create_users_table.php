@@ -15,6 +15,10 @@ return new class extends Migration
       $table->id();
       $table->string('name')->unique();
       $table->string('nickname');
+      $table->string('bio')->nullable();
+      $table->integer('following')->default(0);
+      $table->integer('followers')->default(0);
+
       $table->string('profile_picture')->default("/default-profile-picture.svg");
       $table->string('background_picture')->default("none");
 

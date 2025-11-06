@@ -85,6 +85,33 @@ Route::middleware("auth")->group(function () {
       "tweeted_by" => "required|integer",
     ]);
 
-    Tweet::create($tweet);
+    Tweet::create($tweet); // @TODO @Temporary: Send html response for the newly created tweet
+  });
+
+  Route::get("/profile", function () {
+    return view("profile", ["user" => Auth::user()]);
+  });
+
+  Route::post("/edit-profile", function (Request $request) {
+    $info = $request->validate([
+      "background_picture" => "nullable|image|max:10240", // Max 10MB
+      "profile_picture" => "nullable|image|max:2048", // Max 2MB
+      "nickname" => "required|string",
+      "bio" => "nullable|string",
+    ]);
+
+    if (array_key_exists("profile_picture", $info)) {
+      $info['profile_picture'] = "/storage/".$request->file("profile_picture")->store("uploads", "public") or function() {
+        return response("File operation failed!", 500);
+      };
+    }
+    if (array_key_exists("background_picture", $info)) {
+      $info['background_picture'] = "/storage/".$request->file("background_picture")->store("uploads", "public") or function() {
+        return response("File operation failed!", 500);
+      };
+    }
+
+    User::where("id", Auth::user()->id) ->update($info);
+    return response("Update successfully", 200);
   });
 });
