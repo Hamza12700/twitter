@@ -4,8 +4,14 @@
       @csrf
       <div class="font-bold py-2 sticky z-2 bg-black top-0 flex justify-between items-center text-lg"r>
         <p><span onclick="document.getElementById('dialog').close()" class="mr-3 cursor-pointer">❌</span>Edit Profile</p>
-        <button class="bg-white text-black focus:outline-none px-2 py-1 rounded-lg" type="submit">Save</button>
+        <button onclick="save()" class="bg-white text-black focus:outline-none px-2 py-1 rounded-lg" type="submit">Save</button>
       </div>
+      <script>
+      function save() {
+        document.getElementById("dialog").close();
+        setTimeout(() => window.location.reload(), 400);
+      }
+      </script>
 
       <div class="col-span-full border-b border-white/25 pb-4 my-4">
         <label for="cover-photo" class="block text-sm/6 font-medium text-white">Cover photo</label>
@@ -76,7 +82,7 @@
           }
           const img_el = document.createElement("img");
           img_el.src = img_path;
-          img_el.classList.add("size-20", "rounded-full");
+          img_el.classList.add("size-20", "rounded-full", "object-cover");
           img_el.id = "profile_image";
           const container = document.getElementById("profile-container");
           container.prepend(img_el);
