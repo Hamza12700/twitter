@@ -1,4 +1,5 @@
 <x-layout>
+  @if (Auth::user()->id === $user->id)
   <dialog class="border w-full max-w-[40rem] border-zinc-400 mt-5 md:mt-20 bg-black text-white mx-auto rounded-md" id="dialog">
     <form class="px-2" enctype="multipart/form-data" hx-post="/edit-profile">
       @csrf
@@ -114,10 +115,11 @@
       </div>
     </form>
   </dialog>
+  @endif
 
   <main class="max-w-[70rem] px-2 my-5 mx-auto">
     <div class="flex">
-      <x-side-navbar/>
+      <x-side-navbar :name="Auth::user()->name"/>
 
       <div class="w-full">
         <img
@@ -133,7 +135,12 @@
 
         <img class="w-[6rem] h-[6rem] object-cover absolute ml-2 top-[8rem] rounded-full bg-white" src="{{$user->profile_picture}}" />
 
+        @if (Auth::user()->id === $user->id)
         <button onclick="document.getElementById('dialog').showModal()" class="border cursor-pointer hover:bg-zinc-800 block ml-auto mt-4 border-white px-4 py-2 font-semibold text-lg rounded-lg">Edit profile</button>
+        @else
+        <button class="border cursor-pointer hover:bg-zinc-800 block ml-auto mt-4
+          border-white px-4 py-2 font-semibold text-lg rounded-lg">Follow</button>
+        @endif
 
         <h1 class="text-2xl font-bold">{{$user->nickname}}</h1>
         <p class="text-zinc-500"><span>@</span>{{$user->name}}</p>

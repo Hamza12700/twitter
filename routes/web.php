@@ -88,10 +88,6 @@ Route::middleware("auth")->group(function () {
     Tweet::create($tweet); // @TODO @Temporary: Send html response for the newly created tweet
   });
 
-  Route::get("/profile", function () {
-    return view("profile", ["user" => Auth::user()]);
-  });
-
   Route::post("/edit-profile", function (Request $request) {
     $info = $request->validate([
       "background_picture" => "nullable|image|max:10240", // Max 10MB
@@ -115,3 +111,13 @@ Route::middleware("auth")->group(function () {
     return response("Update successfully", 200);
   });
 });
+
+Route::get("/{user}", function (string $user) {
+  $user = User::firstWhere("name", $user);
+  if (!$user) { // @Temporary: display message user not found
+    return redirect("/home");
+  };
+
+  return view("profile", ["user" => $user]);
+})->middleware('auth');
+

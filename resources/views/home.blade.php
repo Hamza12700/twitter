@@ -12,7 +12,7 @@
 
   <main class="max-w-[80rem] px-2 my-5 mx-auto">
     <div class="flex">
-      <x-side-navbar/>
+      <x-side-navbar :name="Auth::user()->name"/>
 
       @php $user_profile_picture = Auth::user()->profile_picture; @endphp
       <div class="w-full max-w-[50rem]">
@@ -41,10 +41,11 @@
             @endphp
 
             <div class="flex gap-2">
-              <img class="w-[3rem] h-[3rem] object-cover self-start rounded-full" src="{{$user_profile_picture}}" />
+              <img class="w-[3rem] h-[3rem] object-cover self-start rounded-full"
+                src="{{$user->profile_picture}}" />
               <div class="w-full max-w-[40rem]">
                 <p class="font-bold">
-                  <a class="hover:underline" href="/user/{{$user->name}}">{{$user->nickname}}</a>
+                  <a class="hover:underline" href="/{{$user->name}}">{{$user->nickname}}</a>
                   <span class="ml-1 text-zinc-500 font-normal text-sm"><span>@</span>{{$user->name}} ·</span>
                   <span class="text-zinc-500 font-normal text-sm">{{$date->shortEnglishMonth}} {{$date->day}}</span>
                 </p>
