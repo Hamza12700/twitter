@@ -1,5 +1,7 @@
+@use('App\Models\Follower')
+
 <x-layout>
-  @if (Auth::user()->id === $user->id)
+  @if ($auth_user->id === $user->id)
   <dialog class="border w-full max-w-[40rem] border-zinc-400 mt-5 md:mt-20 bg-black text-white mx-auto rounded-md" id="dialog">
     <form class="px-2" enctype="multipart/form-data" hx-post="/edit-profile">
       @csrf
@@ -119,7 +121,7 @@
 
   <main class="max-w-[70rem] px-2 my-5 mx-auto">
     <div class="flex">
-      <x-side-navbar :name="Auth::user()->name"/>
+      <x-side-navbar :name="$auth_user->name"/>
 
       <div class="w-full">
         <img
@@ -135,19 +137,58 @@
 
         <img class="w-[6rem] h-[6rem] object-cover absolute ml-2 top-[8rem] rounded-full bg-white" src="{{$user->profile_picture}}" />
 
-        @if (Auth::user()->id === $user->id)
+        @if ($auth_user->id === $user->id)
         <button onclick="document.getElementById('dialog').showModal()" class="border cursor-pointer hover:bg-zinc-800 block ml-auto mt-4 border-white px-4 py-2 font-semibold text-lg rounded-lg">Edit profile</button>
+        @elseif (Follower::where("follower_id", $auth_user->id)->first())
+        <form>
+          @csrf
+          <input name="user_id" type="hidden" value="{{$user->id}}" />
+          <input name="follower_id" type="hidden" value="{{$auth_user->id}}" />
+          <button
+            type="submit"
+            hx-post="/unfollow/{{$auth_user->id}}"
+            hx-target="this"
+            hx-swap="innerHTML"
+            id="following"
+            class="border cursor-pointer hover:bg-zinc-800 block ml-auto mt-4 border-white
+            px-4 py-2 font-semibold text-lg rounded-lg">Following</button>
+          <script>
+          const btn = document.getElementById("following");
+          const unfollow_btn_style = ["hover:text-red-500", "hover:border-red-500"];
+          btn.addEventListener("mouseover",  () => {
+            if (btn.innerText === "Following") {
+              btn.classList.add(...unfollow_btn_style);
+              btn.innerText = "Unfollow";
+            }
+          });
+
+          btn.addEventListener("mouseleave", () => {
+            if (btn.innerText === "Follow") {
+              btn.classList.remove(...unfollow_btn_style);
+            } else { btn.innerText = "Following"; }
+          });
+          </script>
         @else
-        <button class="border cursor-pointer hover:bg-zinc-800 block ml-auto mt-4
-          border-white px-4 py-2 font-semibold text-lg rounded-lg">Follow</button>
+        <form>
+          @csrf
+          <input name="user_id" type="hidden" value="{{$user->id}}" />
+          <input name="follower_id" type="hidden" value="{{$auth_user->id}}" />
+          <button
+            type="submit"
+            hx-post="/follow/{{$user->id}}"
+            hx-target="this"
+            hx-swap="innerHTML"
+            class="border cursor-pointer hover:bg-zinc-800 block ml-auto mt-4 border-white
+            px-4 py-2 font-semibold text-lg rounded-lg">Follow</button>
+        </form>
         @endif
 
         <h1 class="text-2xl font-bold">{{$user->nickname}}</h1>
         <p class="text-zinc-500"><span>@</span>{{$user->name}}</p>
         <p class="mt-4 text-sm w-full max-w-[30rem]">{{$user->bio}}</p>
         <div class="flex gap-5 my-2">
-          <p class="text-zinc-500"><span class="font-bold text-white">{{$user->following}}</span> Following</p>
-          <p class="text-zinc-500"><span class="font-bold text-white">{{$user->followers}}</span> Followers</p>
+          <p class="text-zinc-500"><span class="font-bold text-white">{{$following}}</span> Following</p>
+          <p class="text-zinc-500"><span class="font-bold text-white">{{$followers}}</span> Followers</p>
         </div>
       </div>
     </div>

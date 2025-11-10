@@ -9,6 +9,8 @@
     <link rel="icon" type="image/x-icon" href="favicon.png">
     <script>
     htmx.config.responseHandling = [
+      {code:"204",swap:false},
+      {code:"[2]..",swap:true},
       {code:"[4]..",swap:true},
       @if (config("app.debug"))
         {code:"500", swap:true},

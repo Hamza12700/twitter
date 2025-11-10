@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Tweet;
+use App\Models\Follower;
 
 // Sucks that can't simply use 'redirect' because of HTMX.
 // Htmx doesn't reload/redirect if status code isn't 2xx.
@@ -107,8 +108,33 @@ Route::middleware("auth")->group(function () {
       };
     }
 
-    User::where("id", Auth::user()->id) ->update($info);
+    User::where("id", Auth::user()->id)->update($info);
     return response("Update successfully", 200);
+  });
+
+
+  Route::post("/unfollow/{follower_id}", function (Request $request, int $follower_id) {
+    $user = Follower::where("follower_id", $follower_id);
+    if (!$user) {
+      return response("User doesn't exists", 403);
+    }
+
+    $user->delete();
+    return response("Follow");
+  });
+
+  Route::post("/follow/{user_id}", function (Request $request, int $user_id) {
+    if (!User::find($user_id)) {
+      return response("User doesn't exists", 403);
+    }
+
+    $info = $request->validate([
+      "user_id" => "required|integer",
+      "follower_id" => "required|integer",
+    ]);
+
+    Follower::create($info);
+    return response("Following");
   });
 });
 
@@ -118,6 +144,11 @@ Route::get("/{user}", function (string $user) {
     return redirect("/home");
   };
 
-  return view("profile", ["user" => $user]);
+  return view("profile", [
+    "user" => $user,
+    "auth_user" => Auth::user(),
+    "followers" => Follower::where("user_id", $user->id)->count(),
+    "following" => Follower::where("follower_id", $user->id)->count(),
+  ]);
 })->middleware('auth');
 
