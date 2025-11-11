@@ -76,7 +76,7 @@ Route::get("/logout", function (Request $request) {
   Auth::logout();
   $request->session()->invalidate();
   $request->session()->regenerateToken();
-  return redirect('/');
+  return hx_redirect('/login');
 })->middleware('auth');
 
 Route::middleware("auth")->group(function () {
@@ -87,6 +87,7 @@ Route::middleware("auth")->group(function () {
     ]);
 
     Tweet::create($tweet); // @TODO @Temporary: Send html response for the newly created tweet
+    return response("Tweeted Successfully", 204);
   });
 
   Route::post("/edit-profile", function (Request $request) {

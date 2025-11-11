@@ -1,22 +1,13 @@
 @use('Carbon\Carbon')
 
 <x-layout>
-
-  <script>
-  function clean_up() {
-    const textarea = document.querySelector("form textarea");
-    textarea.value = "";
-    window.location.reload();
-  }
-  </script>
-
   <main class="max-w-[80rem] px-2 my-5 mx-auto">
     <div class="flex">
       <x-side-navbar :name="Auth::user()->name"/>
 
       @php $user_profile_picture = Auth::user()->profile_picture; @endphp
       <div class="w-full max-w-[50rem]">
-        <form hx-on:htmx:after-request="clean_up()" class="border-b border-white pb-5" hx-post="/tweet">
+        <form id="tweet_form" class="border-b border-white pb-5" hx-post="/tweet">
           @csrf
           <input name="tweeted_by" type="hidden" value="{{$user_id}}" />
           <div class="flex gap-3">
@@ -31,6 +22,15 @@
             class="bg-white ml-auto text-black block px-4 font-semibold text-lg py-2 rounded-lg cursor-pointer"
             type="submit">Tweet</button>
         </form>
+
+        <script>
+        document.body.addEventListener("htmx:afterRequest", function (e) {
+          if (e.target.id === "tweet_form") {
+            e.target.reset();
+            window.location.reload();
+          }
+        });
+        </script>
 
         <div id="tweets">
           @foreach ($tweets as $tweet)

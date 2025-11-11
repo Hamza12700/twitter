@@ -36,6 +36,21 @@
             <p class="text-xs/5 text-gray-400">PNG, JPG, GIF up to 10MB</p>
           </div>
         </div>
+
+        <script>
+        function update_background_image(event) {
+          const img = event.target.files[0];
+          const img_path = URL.createObjectURL(img);
+          document.getElementById("bg-img-container").hidden = true;
+          const parent = document.getElementById("bg-img-parent");
+          const img_el = document.createElement("img");
+          img_el.src = img_path;
+          img_el.classList.add("h-[15rem]", "object-center", "object-cover", "w-full");
+
+          parent.classList.remove("px-6", "py-10");
+          parent.appendChild(img_el);
+        }
+        </script>
         @else
         <div class="mt-2 relative">
           <img id="display_image" class="rounded-lg border border-dashed border-white/25 w-full h-[15rem]
@@ -138,8 +153,17 @@
         <img class="w-[6rem] h-[6rem] object-cover absolute ml-2 top-[8rem] rounded-full bg-white" src="{{$user->profile_picture}}" />
 
         @if ($auth_user->id === $user->id)
-        <button onclick="document.getElementById('dialog').showModal()" class="border cursor-pointer hover:bg-zinc-800 block ml-auto mt-4 border-white px-4 py-2 font-semibold text-lg rounded-lg">Edit profile</button>
-        @elseif (Follower::where("follower_id", $auth_user->id)->first())
+        <div class="flex items-center mt-4 gap-2">
+          <button
+            onclick="document.getElementById('dialog').showModal()"
+            class="border cursor-pointer hover:bg-zinc-800 block ml-auto border-white
+            px-4 py-2 font-semibold text-lg rounded-lg">Edit profile</button>
+          <button
+            hx-get="/logout"
+            class="border cursor-pointer hover:bg-zinc-800 block border-white
+            px-4 py-2 font-semibold text-lg rounded-lg hover:border-red-400 hover:text-red-400">Logout</button>
+        </div>
+        @elseif (Follower::where("user_id", $user->id)->first())
         <form>
           @csrf
           <input name="user_id" type="hidden" value="{{$user->id}}" />
