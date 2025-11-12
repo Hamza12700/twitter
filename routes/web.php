@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Tweet;
 use App\Models\Follower;
+use App\Models\Like;
 
 // Sucks that can't simply use 'redirect' because of HTMX.
 // Htmx doesn't reload/redirect if status code isn't 2xx.
@@ -136,6 +137,25 @@ Route::middleware("auth")->group(function () {
 
     Follower::create($info);
     return response("Following");
+  });
+
+  Route::post("/like/{tweet_id}", function (int $tweet_id) {
+    $tweet = Tweet::find($tweet_id);
+    if (!$tweet) { return response("Bad Request", 403); }
+
+    $record = DB::selectOne("select * from likes where user_id = ? and tweet_id = ?", [Auth::user()->id, $tweet_id]);
+    if ($record) { // Tweek is already liked
+      Like::where('tweet_id', $tweet_id)
+        ->where('user_id', Auth::user()->id)
+        ->delete();
+      return response("unliked tweet", 204);
+    }
+
+    $like_tweet = new Like;
+    $like_tweet->user_id = Auth::user()->id;
+    $like_tweet->tweet_id = $tweet_id;
+    $like_tweet->save();
+    return response("Tweet Liked!", 204);
   });
 });
 
