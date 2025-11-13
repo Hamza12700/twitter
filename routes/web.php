@@ -166,7 +166,8 @@ Route::middleware("auth")->group(function () {
 
   Route::get("/tweets", function (Request $request) {
     $offset = $request->query("c");
-    $tweets = Tweet::offset($offset)->limit(10)->get();
+    if ($offset > Tweet::all()->count()) { return response("No more tweets", 204); }
+    $tweets = Tweet::skip($offset)->take(5)->get();
     return view("components.tweet", ["tweets" => $tweets, "offset" => $offset]);
   });
 });

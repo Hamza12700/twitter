@@ -2,7 +2,7 @@
 
 @foreach ($tweets as $tweet)
 
-<div id="xt-{{$tweet->id}}" @if ($loop->last) hx-get="/tweets?c={{$offset+10}}" hx-trigger="revealed" hx-swap="afterend" @endif class="py-5 border-b border-white border-zinc-500">
+<div id="xt-{{$tweet->id}}" @if ($loop->last) hx-get="/tweets?c={{$offset+5}}" hx-trigger="revealed" hx-swap="afterend" @endif class="py-5 border-b border-white border-zinc-500">
   @php
   $user = DB::selectOne("select * from users where id = ?", [$tweet->tweeted_by]);
   $date = Carbon::parse($tweet->created_at);
