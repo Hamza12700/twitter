@@ -82,6 +82,12 @@ Route::get("/logout", function (Request $request) {
 
 Route::middleware("auth")->group(function () {
   Route::post("/tweet", function (Request $request) {
+    if ($tweet_id = $request->query("delete")) {
+      Tweet::where("id", $tweet_id)
+        ->where("tweeted_by", Auth::user()->id)->delete();
+      return response("Tweet removed", 204);
+    }
+
     $tweet = $request->validate([
       "content" => "required|string",
       "tweeted_by" => "required|integer",
