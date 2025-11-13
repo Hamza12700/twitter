@@ -157,6 +157,12 @@ Route::middleware("auth")->group(function () {
     $like_tweet->save();
     return response("Tweet Liked!", 204);
   });
+
+  Route::get("/tweets", function (Request $request) {
+    $offset = $request->query("c");
+    $tweets = Tweet::offset($offset)->limit(10)->get();
+    return view("components.tweet", ["tweets" => $tweets, "offset" => $offset]);
+  });
 });
 
 Route::get("/{user}", function (string $user) {

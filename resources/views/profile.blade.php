@@ -194,6 +194,7 @@
             } else { btn.innerText = "Following"; }
           });
           </script>
+        </form>
           @else
           <form>
             @csrf
