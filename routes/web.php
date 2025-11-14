@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Tweet;
 use App\Models\Follower;
 use App\Models\Like;
+use App\Models\Reply;
 
 // Sucks that can't simply use 'redirect' because of HTMX.
 // Htmx doesn't reload/redirect if status code isn't 2xx.
@@ -169,6 +170,27 @@ Route::middleware("auth")->group(function () {
     if ($offset > Tweet::all()->count()) { return response("No more tweets", 204); }
     $tweets = Tweet::skip($offset)->take(5)->get();
     return view("components.tweet", ["tweets" => $tweets, "offset" => $offset]);
+  });
+
+  Route::get("/reply", function (Request $request) {
+    $tweet_id = (int)$request->query("id");
+    $tweet = Tweet::find($tweet_id);
+    if (!$tweet) { return response("Bad Request", 204); }
+    return view("components.reply-to-tweet", [
+      "tweet" => $tweet,
+      "user" => User::find($tweet->tweeted_by)]
+    );
+  });
+
+  Route::post("/reply", function (Request $request) {
+    $tweet_reply = $request->validate([
+      "content" => "required|string",
+      "tweeted_by" => "required|integer",
+    ]);
+    $tweet = Tweet::create($tweet_reply);
+    $reply_info = $request->validate(["tweet_id" => "required|integer"]);
+    $reply_info["reply"] = $tweet->id;
+    Reply::create($reply_info);
   });
 });
 

@@ -37,6 +37,7 @@
           document.getElementById("tweets").addEventListener("click", (e) => {
             let btn = e.target.parentElement;
             if (btn.tagName === "svg") { btn = btn.parentElement; }
+            if (btn.title !== "Like") { return; }
             const tweet_id = Number(btn.id.split("-")[1]);
             const like = document.getElementById(`like-${tweet_id}`).classList;
             const unlike = document.getElementById(`unlike-${tweet_id}`).classList;
