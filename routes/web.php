@@ -85,7 +85,9 @@ Route::middleware("auth")->group(function () {
   Route::post("/tweet", function (Request $request) {
     if ($tweet_id = $request->query("delete")) {
       Tweet::where("id", $tweet_id)
-        ->where("tweeted_by", Auth::user()->id)->delete();
+        ->where("tweeted_by", Auth::user()->id)
+        ->delete();
+      Reply::where("reply", $tweet_id)->delete();
       return response("Tweet removed", 204);
     }
 
@@ -167,9 +169,17 @@ Route::middleware("auth")->group(function () {
 
   Route::get("/tweets", function (Request $request) {
     $offset = $request->query("c");
+    $user_only = $request->query("user_only");
+    if ($user_only) {
+      if ($offset > Tweet::where("tweeted_by", Auth::user()->id)->count()) { return response("No more tweets", 204); }
+      $tweets = Tweet::where("tweeted_by", Auth::user()->id)
+        ->offset($offset)->take(5)->get();
+      return view("components.tweets", ["tweets" => $tweets, "offset" => $offset, "user_only" => true]);
+    }
+
     if ($offset > Tweet::all()->count()) { return response("No more tweets", 204); }
     $tweets = Tweet::skip($offset)->take(5)->get();
-    return view("components.tweet", ["tweets" => $tweets, "offset" => $offset]);
+    return view("components.tweets", ["tweets" => $tweets, "offset" => $offset]);
   });
 
   Route::get("/reply", function (Request $request) {
@@ -190,7 +200,8 @@ Route::middleware("auth")->group(function () {
     $tweet = Tweet::create($tweet_reply);
     $reply_info = $request->validate(["tweet_id" => "required|integer"]);
     $reply_info["reply"] = $tweet->id;
-    Reply::create($reply_info);
+    $tweet->replies = Reply::create($reply_info)->id;
+    $tweet->save();
   });
 });
 

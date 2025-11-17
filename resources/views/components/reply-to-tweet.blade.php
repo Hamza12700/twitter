@@ -1,6 +1,6 @@
 @use('Carbon\Carbon')
 
-<dialog class="border w-full max-w-[40rem] fixed top-1 border-zinc-400 md:mt-20 bg-black text-white mx-auto rounded-md" id="dialog">
+<dialog class="border w-full max-w-[40rem] fixed top-1 border-zinc-400 md:mt-20 bg-black text-white mx-auto rounded-md" id="reply-dialog">
   <form hx-on::after-request="window.location.reload()" hx-post="/reply" class="p-2">
     @csrf
 
@@ -34,6 +34,7 @@
       <img class="w-[3rem] h-[3rem] object-cover self-start rounded-full"
         src="{{Auth::user()->profile_picture}}" />
       <textarea
+        autofocus
         class="p-2 rounded-md focus:outline-none w-full text-lg mb-3 h-[7rem]"
         required
         placeholder="Post your reply"
@@ -46,7 +47,7 @@
 </dialog>
 
 <script>
-document.getElementById("dialog").showModal();
+document.getElementById("reply-dialog").showModal();
 </script>
 <style>
 ::backdrop {

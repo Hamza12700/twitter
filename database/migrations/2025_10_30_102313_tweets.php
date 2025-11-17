@@ -11,6 +11,7 @@ return new class extends Migration
       $table->id();
       $table->integer("tweeted_by"); // User-ID
       $table->string("content"); // @Temporary: For now only worry about text
+      $table->integer("replies")->nullable(); // ID for tweet in the 'replies' table
       $table->timestamps();
     });
   }

@@ -23,38 +23,37 @@
             type="submit">Tweet</button>
         </form>
 
-        <script hx-get="/tweets?c=0" hx-trigger="revealed" hx-target="#tweets">
-        document.body.addEventListener("htmx:afterRequest", function (e) {
-          if (e.target.id === "tweet_form") {
-            e.target.reset();
-            window.location.reload();
-          }
-        });
-        </script>
-
-        <div id="tweets">
-          <script>
-          document.getElementById("tweets").addEventListener("click", (e) => {
-            let btn = e.target.parentElement;
-            if (btn.tagName === "svg") { btn = btn.parentElement; }
-            if (btn.title !== "Like") { return; }
-            const tweet_id = Number(btn.id.split("-")[1]);
-            const like = document.getElementById(`like-${tweet_id}`).classList;
-            const unlike = document.getElementById(`unlike-${tweet_id}`).classList;
-            const likes = document.getElementById(`likesCounts-${tweet_id}`);
-            if (like.contains("hidden")) {
-              like.remove("hidden");
-              unlike.add("hidden");
-              likes.innerText = Number(likes.innerText)+1;
-            } else {
-              like.add("hidden");
-              unlike.remove("hidden");
-              likes.innerText = Number(likes.innerText)-1;
-            }
-          });
-          </script>
-        </div>
+        <div id="tweets"></div>
+        <img class="htmx-indicator w-[2rem] mx-auto mt-4" alt="loading..." id="spinner" src="/bars.svg" />
       </div>
     </div>
   </main>
+
+  <script hx-indicator="#spinner" hx-get="/tweets?c=0" hx-trigger="revealed" hx-target="#tweets">
+  document.body.addEventListener("htmx:afterRequest", function (e) {
+    if (e.target.id === "tweet_form") {
+      e.target.reset();
+      window.location.reload();
+    }
+  });
+
+  document.getElementById("tweets").addEventListener("click", (e) => {
+    let btn = e.target.parentElement;
+    if (btn.tagName === "svg") { btn = btn.parentElement; }
+    if (btn.title !== "Like") { return; }
+    const tweet_id = Number(btn.id.split("-")[1]);
+    const like = document.getElementById(`like-${tweet_id}`).classList;
+    const unlike = document.getElementById(`unlike-${tweet_id}`).classList;
+    const likes = document.getElementById(`likesCounts-${tweet_id}`);
+    if (like.contains("hidden")) {
+      like.remove("hidden");
+      unlike.add("hidden");
+      likes.innerText = Number(likes.innerText)+1;
+    } else {
+      like.add("hidden");
+      unlike.remove("hidden");
+      likes.innerText = Number(likes.innerText)-1;
+    }
+  });
+  </script>
 </x-layout>

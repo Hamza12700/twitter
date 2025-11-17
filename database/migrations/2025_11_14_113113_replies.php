@@ -8,7 +8,7 @@ return new class extends Migration {
   public function up(): void {
     Schema::create("replies", function (Blueprint $table) {
       $table->id();
-      $table->integer("tweet_id");
+      $table->integer("tweet_id"); // The original tweet
       $table->integer("reply"); // The replyer's Tweet-ID
       $table->timestamps();
     });
