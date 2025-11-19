@@ -222,7 +222,7 @@
           <button class="font-bold">Posts</button>
 
           <div id="tweets" class="mt-2 border-t border-white">
-            @php $tweets = Tweet::where("tweeted_by", $user->id)->limit(5)->get(); @endphp
+            @php $tweets = Tweet::where("tweeted_by", $user->id)->limit(5)->latest()->get(); @endphp
             <x-tweets user_only :tweets="$tweets" />
           </div>
         </nav>

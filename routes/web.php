@@ -82,6 +82,14 @@ Route::get("/logout", function (Request $request) {
 })->middleware('auth');
 
 Route::middleware("auth")->group(function () {
+  Route::get("/tweet/{tweet_id}", function (string $tweet_id) {
+    $tweet = Tweet::find((int) $tweet_id);
+    if (!$tweet) { return redirect("/", 403); }
+    $replies = Reply::where("tweet_id", $tweet->id)->latest()->get();
+    $tweet_user = User::find($tweet->tweeted_by);
+    return view("components.view_tweet", ["replies" => $replies, "tweet" => $tweet, "user" => $tweet_user]);
+  });
+
   Route::post("/tweet", function (Request $request) {
     if ($tweet_id = $request->query("delete")) {
       Tweet::where("id", $tweet_id)
@@ -173,12 +181,12 @@ Route::middleware("auth")->group(function () {
     if ($user_only) {
       if ($offset > Tweet::where("tweeted_by", Auth::user()->id)->count()) { return response("No more tweets", 204); }
       $tweets = Tweet::where("tweeted_by", Auth::user()->id)
-        ->offset($offset)->take(5)->get();
+        ->offset($offset)->limit(5)->latest()->get();
       return view("components.tweets", ["tweets" => $tweets, "offset" => $offset, "user_only" => true]);
     }
 
     if ($offset > Tweet::all()->count()) { return response("No more tweets", 204); }
-    $tweets = Tweet::skip($offset)->take(5)->get();
+    $tweets = Tweet::latest()->skip($offset)->limit(5)->get();
     return view("components.tweets", ["tweets" => $tweets, "offset" => $offset]);
   });
 
@@ -202,6 +210,21 @@ Route::middleware("auth")->group(function () {
     $reply_info["reply"] = $tweet->id;
     $tweet->replies = Reply::create($reply_info)->id;
     $tweet->save();
+  });
+
+  Route::get("/replies", function (Request $request) {
+    $count = (int)$request->query("c");
+    $tweet_id = (int)$request->query("tweet_id");
+    if (!Tweet::find($tweet_id)) { return redirect("/"); }
+    $replies = Reply::where("tweet_id", $tweet_id)
+      ->latest()->offset($count)->limit(5)->get();
+
+    $tweets = [];
+    foreach ($replies as $reply) {
+      $tweets[] = Tweet::find($reply->reply);
+    }
+
+    return view("components.tweets", ["tweets" => $tweets, "offset" => $count, "replies" => true]);
   });
 });
 

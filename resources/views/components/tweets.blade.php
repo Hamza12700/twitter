@@ -3,13 +3,14 @@
 @use('App\Models\User')
 @use('App\Models\Tweet')
 
-@props(["user_only" => false, "offset" => 0, "tweets"])
+@props(["user_only" => false, "offset" => 0, "tweets", "replies" => false])
 
 <div id="reply"></div>
 
 @foreach ($tweets as $tweet)
 <div id="xt-{{$tweet->id}}" @if ($loop->last)
-  @if($user_only) hx-get="/tweets?user_only=true&c={{$offset+5}}" @else hx-get="/tweets?c={{$offset+5}}" @endif
+  @if($user_only) hx-get="/tweets?user_only=true&c={{$offset+5}}" @elseif ($replies)
+  hx-get="/replies?c={{$offset+5}}&tweet_id={{$tweet->id}}" @else hx-get="/tweets?c={{$offset+5}}" @endif
   hx-trigger="revealed" hx-swap="afterend" hx-indicator="#spinner" @endif class="py-5 border-b border-white border-zinc-500">
   @php
   $user = DB::selectOne("select * from users where id = ?", [$tweet->tweeted_by]);
@@ -22,7 +23,7 @@
   [Auth::user()->id, $tweet->id])) { $is_liked = true; }
   @endphp
 
-  @if ($tweet->replies)
+  @if ($tweet->replies && !$replies)
   @php
   if ($tweet->replies) {
     $reply = Reply::find($tweet->replies);
@@ -31,7 +32,8 @@
   @endphp
 
   <div>
-    <p class="text-white/40 font-semibold mb-4">Replying to <span class="text-sky-500"><span>@</span>{{$replyee->name}}</p>
+    <p class="text-white/40 font-semibold mb-4">Replying to <a href="/{{$replyee->name}}"
+      class="text-sky-500 hover:underline"><span>@</span>{{$replyee->name}}</a></p>
   </div>
   @endif
 
@@ -44,7 +46,7 @@
         <span class="ml-1 text-zinc-500 font-normal text-sm"><span>@</span>{{$user->name}} ·</span>
         <span class="text-zinc-500 font-normal text-sm">{{$date->shortEnglishMonth}} {{$date->day}}</span>
       </p>
-      <p>{{$tweet->content}}</p>
+      <p onclick="window.location.href = '/tweet/{{$tweet->id}}'" class="cursor-pointer">{{$tweet->content}}</p>
 
       <form class="flex mt-4 gap-10 tweet_menu">
         @csrf
@@ -71,7 +73,7 @@
     @if ($user->id === Auth::user()->id)
     <form>
       @csrf
-      <button type="submit" hx-post="/tweet?delete={{$tweet->id}}" class="h-fit" title="Delete">
+      <button hx-on::after-request="document.getElementById('xt-{{$tweet->id}}').remove();" type="submit" hx-post="/tweet?delete={{$tweet->id}}" class="h-fit" title="Delete">
         <svg class="fill-white/40 w-[1.2rem] cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M183.1 137.4C170.6 124.9 150.3 124.9 137.8 137.4C125.3 149.9 125.3 170.2 137.8 182.7L275.2 320L137.9 457.4C125.4 469.9 125.4 490.2 137.9 502.7C150.4 515.2 170.7 515.2 183.2 502.7L320.5 365.3L457.9 502.6C470.4 515.1 490.7 515.1 503.2 502.6C515.7 490.1 515.7 469.8 503.2 457.3L365.8 320L503.1 182.6C515.6 170.1 515.6 149.8 503.1 137.3C490.6 124.8 470.3 124.8 457.8 137.3L320.5 274.7L183.1 137.4z"/></svg>
       </button>
     </form>
