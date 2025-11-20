@@ -177,12 +177,24 @@ Route::middleware("auth")->group(function () {
 
   Route::get("/tweets", function (Request $request) {
     $offset = $request->query("c");
-    $user_only = $request->query("user_only");
+    $user_only = (bool)$request->query("user_only");
+
     if ($user_only) {
-      if ($offset > Tweet::where("tweeted_by", Auth::user()->id)->count()) { return response("No more tweets", 204); }
-      $tweets = Tweet::where("tweeted_by", Auth::user()->id)
-        ->offset($offset)->limit(5)->latest()->get();
-      return view("components.tweets", ["tweets" => $tweets, "offset" => $offset, "user_only" => true]);
+      $user = User::find($request->query("user_id"));
+      if (!$user) { return response("Bad request", 204); }
+      if ($offset > Tweet::where("tweeted_by", $user->id)->count()) { return response("No more tweets", 204); }
+
+      $replies = (bool)$request->query("replies");
+      if ($replies) {
+        $tweets = Tweet::where("tweeted_by", $user->id)
+          ->where("replies", null)
+          ->offset($offset)->limit(5)->latest()->get();
+      } else {
+        $tweets = Tweet::where("tweeted_by", $user->id)
+          ->offset($offset)->limit(5)->latest()->get();
+      }
+
+      return view("components.tweets", ["tweets" => $tweets, "offset" => $offset, "user_only" => true, "replies" => $replies]);
     }
 
     if ($offset > Tweet::all()->count()) { return response("No more tweets", 204); }
@@ -214,6 +226,15 @@ Route::middleware("auth")->group(function () {
 
   Route::get("/replies", function (Request $request) {
     $count = (int)$request->query("c");
+    if ($user_id = (int)$request->query("user_id")) {
+      $tweets = Tweet::where("tweeted_by", $user_id)
+        ->whereNotNull("replies")
+        ->latest()->offset($count)->limit(5)->get();
+      if ($count > count($tweets)) { return response("No more tweets", 204); }
+
+      return view("components.tweets", ["tweets" => $tweets, "offset" => $count, "replies_only" => true]);
+    }
+
     $tweet_id = (int)$request->query("tweet_id");
     if (!Tweet::find($tweet_id)) { return redirect("/"); }
     $replies = Reply::where("tweet_id", $tweet_id)

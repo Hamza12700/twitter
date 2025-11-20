@@ -3,25 +3,24 @@
 @use('App\Models\User')
 @use('App\Models\Tweet')
 
-@props(["user_only" => false, "offset" => 0, "tweets", "replies" => false])
+@props(["user_only" => false, "offset" => 0, "tweets", "replies" => false, "replies_only" => false])
 
 <div id="reply"></div>
 
 @foreach ($tweets as $tweet)
-<div id="xt-{{$tweet->id}}" @if ($loop->last)
-  @if($user_only) hx-get="/tweets?user_only=true&c={{$offset+5}}" @elseif ($replies)
-  hx-get="/replies?c={{$offset+5}}&tweet_id={{$tweet->id}}" @else hx-get="/tweets?c={{$offset+5}}" @endif
-  hx-trigger="revealed" hx-swap="afterend" hx-indicator="#spinner" @endif class="py-5 border-b border-white border-zinc-500">
-  @php
-  $user = DB::selectOne("select * from users where id = ?", [$tweet->tweeted_by]);
-  $date = Carbon::parse($tweet->created_at);
-  $likes_count = count(DB::select("select * from likes where tweet_id = ?", [$tweet->id]));
-  $replies_count = count(DB::select("select * from replies where tweet_id = ?", [$tweet->id]));
 
-  $is_liked = false;
-  if (DB::selectOne("select * from likes where user_id = ? and tweet_id = ?",
-  [Auth::user()->id, $tweet->id])) { $is_liked = true; }
-  @endphp
+@php
+$user = DB::selectOne("select * from users where id = ?", [$tweet->tweeted_by]);
+$date = Carbon::parse($tweet->created_at);
+$likes_count = count(DB::select("select * from likes where tweet_id = ?", [$tweet->id]));
+$replies_count = count(DB::select("select * from replies where tweet_id = ?", [$tweet->id]));
+
+$is_liked = false;
+if (DB::selectOne("select * from likes where user_id = ? and tweet_id = ?",
+[Auth::user()->id, $tweet->id])) { $is_liked = true; }
+@endphp
+
+<div id="xt-{{$tweet->id}}" @if ($loop->last) @if($user_only) hx-get="/tweets?user_only=true&replies=false&c={{$offset+5}}" @elseif ($replies_only) hx-get="/replies?c={{$offset+5}}&user_id={{$user->id}}" @elseif ($replies) hx-get="/replies?c={{$offset+5}}&tweet_id={{$tweet->id}}" @else hx-get="/tweets?c={{$offset+5}}" @endif hx-trigger="revealed" hx-swap="afterend" hx-indicator="#spinner" @endif class="py-5 border-b border-white border-zinc-500">
 
   @if ($tweet->replies && !$replies)
   @php

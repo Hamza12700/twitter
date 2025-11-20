@@ -219,10 +219,13 @@
         </div>
 
         <nav class="mt-5" >
-          <button class="font-bold">Posts</button>
+          <div class="flex gap-5">
+            <button hx-get="/tweets?user_only=true&c=0&replies=false&user_id={{$user->id}}" hx-target="#tweets" hx-swap="innerHTML" class="font-bold cursor-pointer">Posts</button>
+            <button hx-get="/replies?c=0&user_id={{$user->id}}" hx-target="#tweets" hx-swap="innerHTML" class="font-bold cursor-pointer">Replies</button>
+          </div>
 
           <div id="tweets" class="mt-2 border-t border-white">
-            @php $tweets = Tweet::where("tweeted_by", $user->id)->limit(5)->latest()->get(); @endphp
+            @php $tweets = Tweet::where("tweeted_by", $user->id)->where("replies", null)->limit(5)->latest()->get(); @endphp
             <x-tweets user_only :tweets="$tweets" />
           </div>
         </nav>
